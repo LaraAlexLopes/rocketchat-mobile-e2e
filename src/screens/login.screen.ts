@@ -9,6 +9,8 @@ class LoginScreen extends BaseScreen {
     password: byTestId('login-view-password'),
     submit: byTestId('login-view-submit'),
     credentialsRejected: byText('Your credentials were rejected! Please try again.'),
+    accountNotActivated: byText('Before you can login, your account must be manually activated by an administrator.'),
+    alertOkButton: byTestId('android:id/button1'),
   };
 
   constructor() {
@@ -17,6 +19,14 @@ class LoginScreen extends BaseScreen {
 
   get credentialsRejectedMessage() {
     return $(this.selectors.credentialsRejected);
+  }
+
+  get accountNotActivatedMessage() {
+    return $(this.selectors.accountNotActivated);
+  }
+
+  async dismissAlert(): Promise<void> {
+    await this.tap(this.selectors.alertOkButton);
   }
 
   async submit({ username, password }: Credentials): Promise<void> {

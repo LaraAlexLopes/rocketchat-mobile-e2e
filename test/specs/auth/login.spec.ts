@@ -31,6 +31,9 @@ describe('Login', () => {
     await authFlow.openLoginForm();
     await loginScreen.submit(user.credentials);
 
+    await expect(loginScreen.accountNotActivatedMessage).toBeDisplayed({ wait: TIMEOUTS.medium });
+    await loginScreen.dismissAlert();
+
     await expectNeverDisplayed(roomsListScreen.rootSelector);
     await expect(loginScreen.root).toBeDisplayed();
   });

@@ -7,7 +7,8 @@ export const byTestId = (testId: string) => {
   return `//*[@resource-id=${id} or @content-desc=${id}]`;
 };
 
-export const byAccessibilityLabel = (label: string) => `//*[@content-desc=${xpathLiteral(label)}]`;
+export const byTestIdContainingAll = (...parts: string[]) =>
+  `//*[${parts.map(part => `contains(@resource-id, ${xpathLiteral(part)})`).join(' and ')}]`;
 
 export const byText = (text: string) => `android=new UiSelector().text("${quote(text)}")`;
 

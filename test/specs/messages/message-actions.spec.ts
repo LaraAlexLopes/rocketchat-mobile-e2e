@@ -35,10 +35,13 @@ describe('Message actions', () => {
     await roomFlow.loginAndOpenRoom(reader.credentials, channel.name);
     await roomScreen.quoteMessage(original.msg, reply);
 
-    await expect(roomScreen.quoteOf(author.name, original.msg)).toBeDisplayed({ wait: TIMEOUTS.medium });
+    await expect(roomScreen.quote(original._id, reply)).toBeDisplayed({ wait: TIMEOUTS.medium });
     const admin = await asAdmin();
-    const stored = await eventually(() => admin.messages.findByText(channel, reply));
-    expect(stored.attachments?.length).toBeGreaterThan(0);
+    const stored = await eventually(async () =>
+      (await admin.messages.list(channel)).find(message => message.msg.includes(reply)),
+    );
+    expect(stored.msg).toContain(`?msg=${original._id})`);
+    expect(stored.u.username).toBe(reader.username);
   });
 
   it('should add a reaction that the server records for the user', async () => {
@@ -78,7 +81,7 @@ describe('Message actions', () => {
     const channel = await testData.publicChannel([author, mentioned]);
 
     await roomFlow.loginAndOpenRoom(author.credentials, channel.name);
-    await roomScreen.mention(mentioned.username);
+    await roomScreen.mention(mentioned);
 
     const admin = await asAdmin();
     await eventually(

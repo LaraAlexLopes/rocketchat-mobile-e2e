@@ -1,6 +1,6 @@
 import { TIMEOUTS } from '../config/timeouts';
 import { device } from '../utils/device';
-import { byAccessibilityLabel, byButtonText, byTestId, byText } from '../utils/selectors';
+import { byButtonText, byTestId, byTestIdContainingAll, byText } from '../utils/selectors';
 import { BaseScreen } from './base.screen';
 
 export type MessageAction = 'edit' | 'quote' | 'delete';
@@ -13,10 +13,11 @@ class RoomScreen extends BaseScreen {
     threadComposer: byTestId('message-composer-input-thread'),
     sendButton: byTestId('message-composer-send'),
     joinButton: byTestId('room-view-join-button'),
-    readOnlyNotice: byAccessibilityLabel('This room is read only'),
+    readOnlyNotice: byText('This room is read only'),
     message: (text: string) => byTestId(`message-content-${text}`),
     messageError: (text: string) => byTestId(`message-error-${text}`),
-    quoteOf: (authorName: string, text: string) => byTestId(`reply-${authorName}-${text}`),
+    quote: (quotedMessageId: string, reply: string) =>
+      byTestIdContainingAll('message-content-', `?msg=${quotedMessageId})`, reply),
     reaction: (emoji: string) => byTestId(`message-reaction-:${emoji}:`),
     autocompleteItem: (value: string) => byTestId(`autocomplete-item-${value}`),
     actionSheet: byTestId('action-sheet'),
@@ -45,8 +46,8 @@ class RoomScreen extends BaseScreen {
     return $(this.selectors.messageError(text));
   }
 
-  quoteOf(authorName: string, text: string) {
-    return $(this.selectors.quoteOf(authorName, text));
+  quote(quotedMessageId: string, reply: string) {
+    return $(this.selectors.quote(quotedMessageId, reply));
   }
 
   reaction(emoji: string) {
@@ -120,9 +121,9 @@ class RoomScreen extends BaseScreen {
     await this.tap(this.selectors.emoji(emoji));
   }
 
-  async mention(username: string): Promise<void> {
-    await this.fill(this.selectors.composer, `@${username}`);
-    await this.tap(this.selectors.autocompleteItem(username));
+  async mention(member: { username: string; name: string }): Promise<void> {
+    await this.fill(this.selectors.composer, `@${member.username}`);
+    await this.tap(this.selectors.autocompleteItem(member.name));
     await this.tap(this.selectors.sendButton);
   }
 
