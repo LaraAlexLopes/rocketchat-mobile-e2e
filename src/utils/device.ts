@@ -47,6 +47,25 @@ export const device = {
     );
   },
 
+  async restartApp(): Promise<void> {
+    await driver.execute('mobile: terminateApp', { appId: env.appPackage });
+    await driver.execute('mobile: activateApp', { appId: env.appPackage });
+  },
+
+  async sendToBackground(seconds: number): Promise<void> {
+    await driver.execute('mobile: backgroundApp', { seconds });
+  },
+
+  async scrollUntilDisplayed(selector: string, maxSwipes = 5): Promise<void> {
+    const { width, height } = await driver.getWindowSize();
+    for (let swipe = 0; swipe < maxSwipes; swipe++) {
+      if (await $(selector).isDisplayed()) return;
+      await device.swipe({ x: width / 2, y: height * 0.75 }, { x: width / 2, y: height * 0.3 });
+      await driver.pause(300);
+    }
+    await device.waitForAppElement(selector, selector, TIMEOUTS.short);
+  },
+
   async swipe(from: { x: number; y: number }, to: { x: number; y: number }, durationMs = 600): Promise<void> {
     await driver
       .action('pointer', { parameters: { pointerType: 'touch' } })

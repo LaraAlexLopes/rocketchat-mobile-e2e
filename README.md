@@ -13,16 +13,33 @@ WebdriverIO 10 · Appium 3 (UiAutomator2) · Mocha · TypeScript · Faker · All
 
 ## What is covered
 
-| Area      | Scenario                                                          | Backend check                |
-| --------- | ----------------------------------------------------------------- | ---------------------------- |
-| Auth      | Login with valid credentials `@smoke`                             | —                            |
-| Auth      | Invalid password is rejected and the user stays on login          | —                            |
-| Channels  | Search shows public channels and hides private groups of others   | —                            |
-| Messages  | Sent message is displayed `@smoke`                                | Stored with the right author |
-| Messages  | Message from another user appears in real time                    | Seeded through the API       |
-| Messages  | Deleted message disappears                                        | Removed from the server      |
-| Offline   | Message sent in airplane mode is flagged as not delivered         | Not stored on the server     |
-| Test data | Seeding, cleanup, idempotent cleanup, sweeping (no device needed) | All of it                    |
+| Area            | Scenario                                                        | Backend check                         |
+| --------------- | --------------------------------------------------------------- | ------------------------------------- |
+| Auth            | Login with valid credentials `@smoke`                           | —                                     |
+| Auth            | Invalid password is rejected and the user stays on login        | —                                     |
+| Auth            | Deactivated user cannot log in                                  | User deactivated through the API      |
+| Session         | User stays logged in after the app restarts                     | —                                     |
+| Session         | Logout returns to the workspace screen `@smoke`                 | —                                     |
+| Channels        | Create a public and a private channel (2 cases)                 | Type and owner stored correctly       |
+| Channels        | Join a public channel from its preview                          | User added to the members             |
+| Channels        | Leave a channel                                                 | User removed from the members         |
+| Channels        | Read-only channel hides the composer for regular members        | Server also rejects their messages    |
+| Channels        | Search shows public channels and hides private groups of others | —                                     |
+| Direct messages | Unread badge appears and clears after reading                   | DM seeded through the API             |
+| Messages        | Send plain and accented text `@smoke` (2 cases)                 | Stored with the right author and text |
+| Messages        | Message from another user appears in real time                  | Seeded through the API                |
+| Messages        | Edit a message                                                  | New text and `editedAt` stored        |
+| Messages        | Quote another user message                                      | Quote attachment stored               |
+| Messages        | React with an emoji                                             | Reaction stored for the user          |
+| Messages        | Reply in a thread                                               | Reply linked to the parent (`tmid`)   |
+| Messages        | Mention a member from autocomplete                              | Mention stored on the message         |
+| Messages        | Delete own message                                              | Removed from the server               |
+| Permissions     | Regular user cannot delete another user message                 | Message still stored                  |
+| Permissions     | Admin can delete another user message                           | Removed from the server               |
+| Offline         | Message sent in airplane mode is flagged as not delivered       | Not stored on the server              |
+| Offline         | Messages received while offline show up after reconnecting      | Sent through the API while offline    |
+| Lifecycle       | Conversation is kept after going to background and back         | —                                     |
+| Test data       | Seeding, cleanup, sweeping, deactivation, read-only, DMs (10)   | All of it, no device needed           |
 
 **Out of scope (for now):** iOS, push notifications, file uploads, end-to-end encryption, video calls.
 

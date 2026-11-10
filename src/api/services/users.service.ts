@@ -26,6 +26,10 @@ export class UsersService {
     return created;
   }
 
+  async setActive(userId: string, active: boolean): Promise<void> {
+    await this.admin.post('users.setActiveStatus', { userId, activeStatus: active });
+  }
+
   async delete(userId: string): Promise<void> {
     await this.admin.post('users.delete', { userId, confirmRelinquish: true });
   }

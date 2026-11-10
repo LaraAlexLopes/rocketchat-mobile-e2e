@@ -1,18 +1,31 @@
 import { TIMEOUTS } from '../config/timeouts';
 import { device } from '../utils/device';
-import { byButtonText, byTestId } from '../utils/selectors';
+import { byAccessibilityLabel, byButtonText, byTestId, byText } from '../utils/selectors';
 import { BaseScreen } from './base.screen';
 
+export type MessageAction = 'edit' | 'quote' | 'delete';
+
 class RoomScreen extends BaseScreen {
-  private readonly selectors = {
+  readonly selectors = {
     title: (roomName: string) => byTestId(`room-view-title-${roomName}`),
+    header: byTestId('room-header'),
     composer: byTestId('message-composer-input'),
+    threadComposer: byTestId('message-composer-input-thread'),
     sendButton: byTestId('message-composer-send'),
+    joinButton: byTestId('room-view-join-button'),
+    readOnlyNotice: byAccessibilityLabel('This room is read only'),
     message: (text: string) => byTestId(`message-content-${text}`),
     messageError: (text: string) => byTestId(`message-error-${text}`),
+    quoteOf: (authorName: string, text: string) => byTestId(`reply-${authorName}-${text}`),
+    reaction: (emoji: string) => byTestId(`message-reaction-:${emoji}:`),
+    autocompleteItem: (value: string) => byTestId(`autocomplete-item-${value}`),
     actionSheet: byTestId('action-sheet'),
     actionSheetHandle: byTestId('action-sheet-handle'),
-    deleteAction: byTestId('message-actions-delete'),
+    action: (action: MessageAction) => byTestId(`message-actions-${action}`),
+    replyInThread: byText('Reply in thread'),
+    addReaction: byTestId('add-reaction'),
+    emojiTab: byTestId('emoji-picker-tab-emoji'),
+    emoji: (emoji: string) => byTestId(`emoji-${emoji}`),
     confirmDeleteButton: byButtonText('Delete'),
   };
 
@@ -32,35 +45,107 @@ class RoomScreen extends BaseScreen {
     return $(this.selectors.messageError(text));
   }
 
+  quoteOf(authorName: string, text: string) {
+    return $(this.selectors.quoteOf(authorName, text));
+  }
+
+  reaction(emoji: string) {
+    return $(this.selectors.reaction(emoji));
+  }
+
+  get composer() {
+    return $(this.selectors.composer);
+  }
+
+  get joinButton() {
+    return $(this.selectors.joinButton);
+  }
+
+  get readOnlyNotice() {
+    return $(this.selectors.readOnlyNotice);
+  }
+
   async sendMessage(text: string): Promise<void> {
     await this.fill(this.selectors.composer, text);
     await this.tap(this.selectors.sendButton);
   }
 
-  async deleteMessage(text: string): Promise<void> {
-    const message = this.message(text);
-    await message.waitForDisplayed({ timeout: TIMEOUTS.medium });
-    await message.longPress();
-    await $(this.selectors.actionSheet).waitForDisplayed({ timeout: TIMEOUTS.medium });
+  async join(): Promise<void> {
+    await this.tap(this.selectors.joinButton);
+  }
 
-    await this.revealInActionSheet(this.selectors.deleteAction);
-    await this.tap(this.selectors.deleteAction);
+  async openRoomActions(): Promise<void> {
+    await this.tap(this.selectors.header);
+  }
+
+  async openMessageActions(text: string): Promise<void> {
+    await device.waitForAppElement(this.selectors.message(text), `message "${text}"`, TIMEOUTS.medium);
+    await this.message(text).longPress();
+    await $(this.selectors.actionSheet).waitForDisplayed({ timeout: TIMEOUTS.medium });
+  }
+
+  async isActionAvailable(action: MessageAction): Promise<boolean> {
+    return this.revealInActionSheet(this.selectors.action(action));
+  }
+
+  async deleteMessage(text: string): Promise<void> {
+    await this.runAction(text, 'delete');
     await this.tap(this.selectors.confirmDeleteButton);
   }
 
-  private async revealInActionSheet(selector: string, attempts = 4): Promise<void> {
+  async editMessage(text: string, newText: string): Promise<void> {
+    await this.runAction(text, 'edit');
+    await this.fill(this.selectors.composer, newText);
+    await this.tap(this.selectors.sendButton);
+  }
+
+  async quoteMessage(text: string, reply: string): Promise<void> {
+    await this.runAction(text, 'quote');
+    await this.fill(this.selectors.composer, reply);
+    await this.tap(this.selectors.sendButton);
+  }
+
+  async replyInThread(text: string, reply: string): Promise<void> {
+    await this.openMessageActions(text);
+    await this.revealInActionSheet(this.selectors.replyInThread);
+    await this.tap(this.selectors.replyInThread);
+    await this.fill(this.selectors.threadComposer, reply);
+    await this.tap(this.selectors.sendButton);
+  }
+
+  async react(text: string, emoji: string): Promise<void> {
+    await this.openMessageActions(text);
+    await this.tap(this.selectors.addReaction);
+    await this.tap(this.selectors.emojiTab);
+    await this.tap(this.selectors.emoji(emoji));
+  }
+
+  async mention(username: string): Promise<void> {
+    await this.fill(this.selectors.composer, `@${username}`);
+    await this.tap(this.selectors.autocompleteItem(username));
+    await this.tap(this.selectors.sendButton);
+  }
+
+  private async runAction(text: string, action: MessageAction): Promise<void> {
+    await this.openMessageActions(text);
+    if (!(await this.isActionAvailable(action))) {
+      throw new Error(`Message action "${action}" is not available for "${text}"`);
+    }
+    await this.tap(this.selectors.action(action));
+  }
+
+  private async revealInActionSheet(selector: string, attempts = 4): Promise<boolean> {
     const { width, height } = await driver.getWindowSize();
     const x = width / 2;
     const handle = $(this.selectors.actionSheetHandle);
 
     for (let attempt = 0; attempt < attempts; attempt++) {
-      if (await $(selector).isDisplayed()) return;
-
+      if (await $(selector).isDisplayed()) return true;
       const fromY = attempt === 0 && (await handle.isDisplayed()) ? (await handle.getLocation()).y + 10 : height * 0.8;
       await device.swipe({ x, y: fromY }, { x, y: height * 0.15 });
       await driver.pause(500);
     }
-    await $(selector).waitForDisplayed({ timeout: TIMEOUTS.short });
+    return $(selector).isDisplayed();
   }
 }
 

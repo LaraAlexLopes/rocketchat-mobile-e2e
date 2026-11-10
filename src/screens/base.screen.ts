@@ -5,8 +5,12 @@ import { byTestId } from '../utils/selectors';
 export abstract class BaseScreen {
   protected constructor(private readonly rootTestId: string) {}
 
+  get rootSelector(): string {
+    return byTestId(this.rootTestId);
+  }
+
   get root() {
-    return $(byTestId(this.rootTestId));
+    return $(this.rootSelector);
   }
 
   async waitForDisplayed(timeout: number = TIMEOUTS.long): Promise<void> {

@@ -6,7 +6,18 @@ export interface Message {
   msg: string;
   rid: string;
   u: { _id: string; username: string };
+  tmid?: string;
+  editedAt?: string;
+  reactions?: Record<string, { usernames: string[] }>;
+  mentions?: { username: string }[];
+  attachments?: unknown[];
 }
+
+const historyEndpoint: Record<Room['t'], string> = {
+  c: 'channels.messages',
+  p: 'groups.messages',
+  d: 'im.messages',
+};
 
 export class MessagesService {
   constructor(private readonly client: ApiClient) {}
@@ -16,9 +27,20 @@ export class MessagesService {
     return message;
   }
 
+  async get(messageId: string): Promise<Message | undefined> {
+    try {
+      const { message } = await this.client.get<{ message: Message }>('chat.getMessage', { msgId: messageId });
+      return message;
+    } catch {
+      return undefined;
+    }
+  }
+
   async list(room: Pick<Room, '_id' | 't'>): Promise<Message[]> {
-    const endpoint = room.t === 'c' ? 'channels.messages' : 'groups.messages';
-    const { messages } = await this.client.get<{ messages: Message[] }>(endpoint, { roomId: room._id, count: 100 });
+    const { messages } = await this.client.get<{ messages: Message[] }>(historyEndpoint[room.t], {
+      roomId: room._id,
+      count: 100,
+    });
     return messages;
   }
 

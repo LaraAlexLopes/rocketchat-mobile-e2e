@@ -7,6 +7,8 @@ export const byTestId = (testId: string) => {
   return `//*[@resource-id=${id} or @content-desc=${id}]`;
 };
 
+export const byAccessibilityLabel = (label: string) => `//*[@content-desc=${xpathLiteral(label)}]`;
+
 export const byText = (text: string) => `android=new UiSelector().text("${quote(text)}")`;
 
 export const byButtonText = (label: string) =>
