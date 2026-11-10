@@ -44,8 +44,17 @@ jobs:
 
       - run: npm ci
 
+      - name: Show Docker versions
+        run: docker version && docker compose version
+
       - name: Start Rocket.Chat server
         run: npm run server:up
+
+      - name: Dump server logs on failure
+        if: failure()
+        run: |
+          docker compose -f docker/docker-compose.yml ps -a
+          docker compose -f docker/docker-compose.yml logs --tail 200 mongodb rocketchat
 
       - name: Verify test data layer (seed, cleanup, sweep)
         run: npm run test:data
