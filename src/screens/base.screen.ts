@@ -18,14 +18,30 @@ export abstract class BaseScreen {
   }
 
   protected async fill(selector: string, value: string): Promise<void> {
-    await device.waitForAppElement(selector, selector, TIMEOUTS.medium);
-    const field = $(selector);
-    await field.click();
-    await field.setValue(value);
+    await this.interact(selector, async field => {
+      await field.click();
+      await field.setValue(value);
+    });
   }
 
   protected async tap(selector: string): Promise<void> {
-    await device.waitForAppElement(selector, selector, TIMEOUTS.medium);
-    await $(selector).click();
+    await this.interact(selector, element => element.click());
+  }
+
+  private async interact(
+    selector: string,
+    action: (element: WebdriverIO.Element) => Promise<unknown>,
+    attempts = 3,
+  ): Promise<void> {
+    for (let attempt = 1; ; attempt++) {
+      await device.waitForAppElement(selector, selector, TIMEOUTS.medium);
+      try {
+        await action(await $(selector).getElement());
+        return;
+      } catch (error) {
+        if (attempt >= attempts) throw error;
+        await device.dismissSystemDialogs();
+      }
+    }
   }
 }
