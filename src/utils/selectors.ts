@@ -1,11 +1,16 @@
 /**
- * Android selectors built on UiAutomator2.
- * React Native exposes `testID` as the Android `resource-id`, so test ids are the primary strategy.
+ * Android selectors.
+ * React Native may expose `testID` as `resource-id` or as `content-desc` depending on the build,
+ * so test ids are matched against both.
  */
 const quote = (value: string) => value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 const regex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const xpathLiteral = (value: string) => (value.includes('"') ? `'${value}'` : `"${value}"`);
 
-export const byTestId = (testId: string) => `android=new UiSelector().resourceId("${quote(testId)}")`;
+export const byTestId = (testId: string) => {
+  const id = xpathLiteral(testId);
+  return `//*[@resource-id=${id} or @content-desc=${id}]`;
+};
 
 export const byText = (text: string) => `android=new UiSelector().text("${quote(text)}")`;
 

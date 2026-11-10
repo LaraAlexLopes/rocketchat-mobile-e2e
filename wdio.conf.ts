@@ -2,6 +2,7 @@ import { env } from './src/config/env';
 import { dataTracker } from './src/data/data-tracker';
 import { runId, runPrefix } from './src/data/naming';
 import { sweep } from './src/data/sweeper';
+import { dumpScreen } from './src/utils/diagnostics';
 import { logger } from './src/utils/logger';
 
 export const config: WebdriverIO.Config = {
@@ -71,8 +72,11 @@ export const config: WebdriverIO.Config = {
   },
 
   /** Worker: evidence on failure, then delete everything the test created. */
-  async afterTest(_test, _context, { passed }) {
-    if (!passed) await driver.takeScreenshot();
+  async afterTest(test, _context, { passed }) {
+    if (!passed) {
+      await driver.takeScreenshot();
+      await dumpScreen(test.title);
+    }
     try {
       await dataTracker.cleanup();
     } catch (error) {
