@@ -1,0 +1,45 @@
+name: rocketchat-e2e
+
+services:
+  mongodb:
+    image: mongo:8.0
+    command: ['--replSet', 'rs0', '--bind_ip_all']
+    healthcheck:
+      # Initiates the single-node replica set on first run, then reports healthy once it is primary.
+      test: >
+        mongosh --quiet --eval
+        "try { rs.status().ok } catch (e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongodb:27017' }] }).ok }"
+      interval: 5s
+      timeout: 10s
+      retries: 30
+      start_period: 5s
+
+  rocketchat:
+    image: rocketchat/rocket.chat:${ROCKETCHAT_VERSION:-8.9.1}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    ports:
+      - '3000:3000'
+    environment:
+      ROOT_URL: http://localhost:3000
+      PORT: 3000
+      MONGO_URL: mongodb://mongodb:27017/rocketchat?replicaSet=rs0
+      MONGO_OPLOG_URL: mongodb://mongodb:27017/local?replicaSet=rs0
+      DEPLOY_METHOD: docker
+      # Admin user created on first boot
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin.e2e}
+      ADMIN_PASS: ${ADMIN_PASSWORD:-Admin@e2e123}
+      ADMIN_EMAIL: admin.e2e@example.com
+      # Test-friendly settings
+      OVERWRITE_SETTING_Show_Setup_Wizard: completed
+      OVERWRITE_SETTING_API_Enable_Rate_Limiter: 'false'
+      OVERWRITE_SETTING_DDP_Rate_Limit_IP_Enabled: 'false'
+      OVERWRITE_SETTING_DDP_Rate_Limit_User_Enabled: 'false'
+      OVERWRITE_SETTING_DDP_Rate_Limit_Connection_Enabled: 'false'
+      OVERWRITE_SETTING_DDP_Rate_Limit_User_By_Method_Enabled: 'false'
+      OVERWRITE_SETTING_DDP_Rate_Limit_Connection_By_Method_Enabled: 'false'
+      OVERWRITE_SETTING_Accounts_TwoFactorAuthentication_Enabled: 'false'
+      OVERWRITE_SETTING_Accounts_TwoFactorAuthentication_By_Email_Enabled: 'false'
+      OVERWRITE_SETTING_Accounts_TwoFactorAuthentication_By_Email_Auto_Opt_In: 'false'
+      OVERWRITE_SETTING_API_User_Limit: '1000'
