@@ -46,14 +46,16 @@ export const device = {
   },
 
   /**
-   * Waits for an app element while dismissing system dialogs that may appear on top of it at any moment
-   * (they are asynchronous, so a single check right after launch is not enough).
+   * Waits for an app element while removing what may cover it at any moment:
+   * system dialogs (asynchronous, so one check after launch is not enough) and the soft keyboard,
+   * which can hide buttons at the bottom of a form such as login submit.
    */
   async waitForAppElement(selector: string, description: string, timeout: number = TIMEOUTS.long): Promise<void> {
     await driver.waitUntil(
       async () => {
         if (await $(selector).isDisplayed()) return true;
-        await device.dismissSystemDialogs();
+        if (await device.dismissSystemDialogs()) return false;
+        await device.hideKeyboard().catch(() => undefined);
         return false;
       },
       { timeout, interval: 1_000, timeoutMsg: `${description} was not displayed` },
