@@ -32,7 +32,9 @@ jobs:
   e2e:
     name: Android E2E
     needs: quality
-    runs-on: ubuntu-latest
+    # Pinned: MongoDB 8.0 refuses to start on Linux kernel >= 6.19 (SERVER-121912),
+    # which ships with the Ubuntu 26 image behind ubuntu-latest.
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7

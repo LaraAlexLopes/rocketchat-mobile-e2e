@@ -75,6 +75,8 @@ npm run report:generate && npm run report:open
 npm run server:down
 ```
 
+> MongoDB 8.0 does not start on Linux kernel 6.19 or newer ([SERVER-121912](https://jira.mongodb.org/browse/SERVER-121912)). CI runs on `ubuntu-24.04` for that reason. Check `uname -r` before running the server locally.
+
 > On Google APIs emulators, disable autofill so it does not cover the login form:
 > `adb shell settings put secure autofill_service null`
 
