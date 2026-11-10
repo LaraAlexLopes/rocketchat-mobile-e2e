@@ -15,16 +15,17 @@ export abstract class BaseScreen {
     await device.waitForAppElement(byTestId(this.rootTestId), this.constructor.name, timeout);
   }
 
+  // Every interaction waits through system dialogs: an ANR or permission prompt can pop up mid-flow.
+
   protected async fill(selector: string, value: string): Promise<void> {
+    await device.waitForAppElement(selector, selector, TIMEOUTS.medium);
     const field = $(selector);
-    await field.waitForDisplayed({ timeout: TIMEOUTS.medium });
     await field.click();
     await field.setValue(value);
   }
 
   protected async tap(selector: string): Promise<void> {
-    const element = $(selector);
-    await element.waitForDisplayed({ timeout: TIMEOUTS.medium });
-    await element.click();
+    await device.waitForAppElement(selector, selector, TIMEOUTS.medium);
+    await $(selector).click();
   }
 }

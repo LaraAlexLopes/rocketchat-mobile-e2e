@@ -2,10 +2,14 @@ import { env } from '../config/env';
 import { TIMEOUTS } from '../config/timeouts';
 import { byButtonText, byTestId } from './selectors';
 
-/** System dialogs that may cover the app on emulators (permissions, autofill, ANR). */
+/**
+ * System dialogs that may cover the app on emulators: runtime permissions, autofill,
+ * and "<app> isn't responding" (ANR), common on slow CI emulators. For an ANR we tap "Wait".
+ */
 const SYSTEM_DIALOG_BUTTONS = [
   byTestId('com.android.permissioncontroller:id/permission_allow_button'),
   byTestId('android:id/autofill_save_no'),
+  byTestId('android:id/aerr_wait'),
   byButtonText('Wait'),
 ];
 
