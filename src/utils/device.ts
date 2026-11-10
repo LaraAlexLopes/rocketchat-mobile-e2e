@@ -35,12 +35,25 @@ export const device = {
     return dismissed;
   },
 
+  async waitForAnyAppElement(selectors: string[], description: string, timeout: number = TIMEOUTS.long): Promise<void> {
+    await driver.waitUntil(
+      async () => {
+        for (const selector of selectors) {
+          if (await $(selector).isDisplayed()) return true;
+        }
+        await device.dismissSystemDialogs();
+        return false;
+      },
+      { timeout, interval: 1_000, timeoutMsg: `none of ${description} was displayed` },
+    );
+  },
+
   async waitForAppElement(selector: string, description: string, timeout: number = TIMEOUTS.long): Promise<void> {
     await driver.waitUntil(
       async () => {
         if (await $(selector).isDisplayed()) return true;
         if (await device.dismissSystemDialogs()) return false;
-        await device.hideKeyboard().catch(() => undefined);
+        await device.hideKeyboard();
         return false;
       },
       { timeout, interval: 1_000, timeoutMsg: `${description} was not displayed` },
@@ -83,6 +96,10 @@ export const device = {
   },
 
   async hideKeyboard(): Promise<void> {
-    if (await driver.isKeyboardShown()) await driver.hideKeyboard();
+    try {
+      if (await driver.isKeyboardShown()) await driver.hideKeyboard();
+    } catch {
+      return;
+    }
   },
 };

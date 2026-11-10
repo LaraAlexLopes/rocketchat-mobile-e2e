@@ -82,6 +82,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: |
             adb shell settings put secure autofill_service null
+            adb shell settings put global hide_error_dialogs 1
             npm test
 
       - name: Generate Allure report

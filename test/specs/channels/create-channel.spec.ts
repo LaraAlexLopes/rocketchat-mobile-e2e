@@ -1,26 +1,21 @@
 import type { RoomType } from '../../../src/api';
 import { buildRoomName } from '../../../src/data/factories/room.factory';
 import { testData } from '../../../src/data/test-data';
-import { authFlow } from '../../../src/flows/auth.flow';
-import { roomFlow } from '../../../src/flows/room.flow';
+import { createRoom, loginAs } from '../../../src/steps';
+import { validateRoomCreated } from '../../../src/validations';
 
-const cases: { type: RoomType; serverType: 'c' | 'p' }[] = [
-  { type: 'public', serverType: 'c' },
-  { type: 'private', serverType: 'p' },
-];
+const types: RoomType[] = ['public', 'private'];
 
 describe('Create channel', () => {
-  for (const { type, serverType } of cases) {
+  for (const type of types) {
     it(`should create a ${type} channel owned by the user`, async () => {
       const owner = await testData.user();
       const name = buildRoomName();
 
-      await authFlow.loginAs(owner.credentials);
-      await roomFlow.createRoom(name, type);
+      await loginAs(owner);
+      await createRoom(name, type);
 
-      const room = await testData.trackRoomCreatedInApp(name);
-      expect(room.t).toBe(serverType);
-      expect(room.u?.username).toBe(owner.username);
+      await validateRoomCreated(name, type, owner);
     });
   }
 });

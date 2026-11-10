@@ -1,28 +1,28 @@
-import { TIMEOUTS } from '../../../src/config/timeouts';
-import { buildMessage } from '../../../src/data/factories/message.factory';
+import { scenario } from '../../../src/data/scenarios';
 import { testData } from '../../../src/data/test-data';
-import { authFlow } from '../../../src/flows/auth.flow';
-import { roomFlow } from '../../../src/flows/room.flow';
-import { roomScreen } from '../../../src/screens/room.screen';
-import { roomsListScreen } from '../../../src/screens/rooms-list.screen';
+import { backToRoomsList, loginAs, openRoomFromList } from '../../../src/steps';
+import {
+  validateMessageDisplayed,
+  validateNoUnreadBadge,
+  validateRoomListed,
+  validateUnreadBadge,
+} from '../../../src/validations';
 
 describe('Direct messages', () => {
   it('should flag an unread direct message and clear the badge once read', async () => {
     const reader = await testData.user();
     const sender = await testData.user();
     const dm = await testData.directMessage(sender, reader);
-    const text = buildMessage();
-    await (await sender.api()).messages.send(dm._id, text);
+    const message = await scenario.messageFrom(sender, dm);
 
-    await authFlow.loginAs(reader.credentials);
+    await loginAs(reader);
+    await validateRoomListed(sender.username);
+    await validateUnreadBadge(1);
 
-    await expect(roomsListScreen.item(sender.username)).toBeDisplayed({ wait: TIMEOUTS.long });
-    await expect(roomsListScreen.unreadBadge(1)).toBeDisplayed({ wait: TIMEOUTS.medium });
+    await openRoomFromList(sender.username);
+    await validateMessageDisplayed(message.msg);
 
-    await roomsListScreen.openRoom(sender.username);
-    await expect(roomScreen.message(text)).toBeDisplayed({ wait: TIMEOUTS.medium });
-
-    await roomFlow.backToRoomsList();
-    await expect(roomsListScreen.unreadBadge(1)).not.toBeDisplayed({ wait: TIMEOUTS.medium });
+    await backToRoomsList();
+    await validateNoUnreadBadge(1);
   });
 });

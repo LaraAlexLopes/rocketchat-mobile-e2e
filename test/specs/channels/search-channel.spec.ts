@@ -1,8 +1,7 @@
-import { TIMEOUTS } from '../../../src/config/timeouts';
 import { runPrefix } from '../../../src/data/naming';
 import { testData } from '../../../src/data/test-data';
-import { authFlow } from '../../../src/flows/auth.flow';
-import { roomsListScreen } from '../../../src/screens/rooms-list.screen';
+import { loginAs, searchRooms } from '../../../src/steps';
+import { validateRoomListed, validateRoomNotListed } from '../../../src/validations';
 
 describe('Channel search', () => {
   it('should show public channels and hide private groups the user is not a member of', async () => {
@@ -11,11 +10,10 @@ describe('Channel search', () => {
     const publicChannel = await testData.publicChannel([user]);
     const privateGroup = await testData.privateGroup([outsider]);
 
-    await authFlow.loginAs(user.credentials);
+    await loginAs(user);
+    await searchRooms(runPrefix());
 
-    await roomsListScreen.search(runPrefix());
-
-    await expect(roomsListScreen.item(publicChannel.name)).toBeDisplayed({ wait: TIMEOUTS.long });
-    await expect(roomsListScreen.item(privateGroup.name)).not.toBeDisplayed();
+    await validateRoomListed(publicChannel);
+    await validateRoomNotListed(privateGroup);
   });
 });

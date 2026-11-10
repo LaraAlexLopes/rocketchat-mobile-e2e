@@ -1,40 +1,29 @@
-import { TIMEOUTS } from '../../../src/config/timeouts';
 import { testData } from '../../../src/data/test-data';
-import { authFlow } from '../../../src/flows/auth.flow';
-import { loginScreen } from '../../../src/screens/login.screen';
-import { roomsListScreen } from '../../../src/screens/rooms-list.screen';
-import { expectNeverDisplayed } from '../../../src/utils/expectations';
+import { loginAs, tryToLoginAs } from '../../../src/steps';
+import { validateAccountNotActivated, validateCredentialsRejected, validateLoggedIn } from '../../../src/validations';
 
 describe('Login', () => {
   it('should log in with valid credentials @smoke', async () => {
     const user = await testData.user();
 
-    await authFlow.openLoginForm();
-    await loginScreen.submit(user.credentials);
+    await loginAs(user);
 
-    await expect(roomsListScreen.root).toBeDisplayed({ wait: TIMEOUTS.long });
+    await validateLoggedIn();
   });
 
   it('should reject an invalid password and stay on the login screen', async () => {
     const user = await testData.user();
 
-    await authFlow.openLoginForm();
-    await loginScreen.submit({ username: user.username, password: 'Wrong!Password1' });
+    await tryToLoginAs({ username: user.username, password: 'Wrong!Password1' });
 
-    await expect(loginScreen.credentialsRejectedMessage).toBeDisplayed({ wait: TIMEOUTS.medium });
-    await expect(roomsListScreen.root).not.toBeDisplayed();
+    await validateCredentialsRejected();
   });
 
   it('should not let a deactivated user log in', async () => {
     const user = await testData.deactivatedUser();
 
-    await authFlow.openLoginForm();
-    await loginScreen.submit(user.credentials);
+    await tryToLoginAs(user);
 
-    await expect(loginScreen.accountNotActivatedMessage).toBeDisplayed({ wait: TIMEOUTS.medium });
-    await loginScreen.dismissAlert();
-
-    await expectNeverDisplayed(roomsListScreen.rootSelector);
-    await expect(loginScreen.root).toBeDisplayed();
+    await validateAccountNotActivated();
   });
 });

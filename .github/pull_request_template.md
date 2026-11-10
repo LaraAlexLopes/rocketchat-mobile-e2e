@@ -6,7 +6,7 @@
 
 - [ ] New test scenarios
 - [ ] Fix for a failing or flaky test
-- [ ] Framework change (screens, flows, API layer, test data)
+- [ ] Framework change (screens, steps, validations, API layer, test data)
 - [ ] CI, tooling or documentation
 
 ## Scenarios

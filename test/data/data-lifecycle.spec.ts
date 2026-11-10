@@ -5,6 +5,7 @@ import { dataTracker } from '../../src/data/data-tracker';
 import { buildRoomName } from '../../src/data/factories/room.factory';
 import { buildUser } from '../../src/data/factories/user.factory';
 import { runPrefix } from '../../src/data/naming';
+import { scenario } from '../../src/data/scenarios';
 import { sweep } from '../../src/data/sweeper';
 import { testData } from '../../src/data/test-data';
 
@@ -119,5 +120,15 @@ describe('Test data lifecycle', () => {
 
     assert.equal(room.u?.username, owner.username);
     assert.equal(await (await asAdmin()).rooms.findByName(name), undefined);
+  });
+
+  it('should build two users in a channel and post as either of them', async () => {
+    const { user, other, channel } = await scenario.twoUsersInChannel();
+
+    const message = await scenario.messageFrom(other, channel);
+    const members = await (await asAdmin()).rooms.members(channel);
+
+    assert.ok(members.includes(user.username) && members.includes(other.username));
+    assert.equal(message.u.username, other.username);
   });
 });
