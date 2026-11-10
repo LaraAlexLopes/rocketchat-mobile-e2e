@@ -50,7 +50,8 @@ src/
 ├── api/        REST client + services (users, rooms, messages), bound to a user session
 ├── data/       factories (Faker), naming/prefix, DataTracker, sweeper, testData facade
 ├── screens/    screen objects: selectors + screen-level actions
-├── flows/      business flows composed from screens (login, open room)
+├── steps/      user actions as plain functions (loginAs, openRoom, sendMessage…)
+├── validations/ reusable checks on screen and server (validateMessageSent…)
 ├── config/     environment and timeouts
 └── utils/      selectors, device control (adb), polling helper, logger
 test/
@@ -59,8 +60,9 @@ test/
 docker/         Rocket.Chat + MongoDB (replica set)
 ```
 
-- **Specs** describe behaviour. **Flows** chain steps. **Screens** know selectors. Only screens touch selectors.
-- **Selectors** use React Native `testID`s, which Android exposes as `resource-id`. Text is only used for system or alert buttons.
+- **Specs** read as arrange → act → validate: `scenario.*` seeds data, `steps` act on the app, `validate*` checks the screen and the server.
+- **Steps** chain screens. **Screens** own the selectors. Specs never touch selectors or the API directly.
+- **Selectors** use React Native `testID`s (exposed as `resource-id` or `content-desc`). Text is only used for system dialogs, alerts and plain text notices.
 
 ## Test data strategy
 

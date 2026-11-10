@@ -1,24 +1,19 @@
-import { TIMEOUTS } from '../../../src/config/timeouts';
 import { buildMessage } from '../../../src/data/factories/message.factory';
-import { testData } from '../../../src/data/test-data';
-import { roomFlow } from '../../../src/flows/room.flow';
-import { roomScreen } from '../../../src/screens/room.screen';
-import { device } from '../../../src/utils/device';
+import { scenario } from '../../../src/data/scenarios';
+import { loginAndOpenRoom, sendAppToBackground, sendMessage } from '../../../src/steps';
+import { validateMessageDisplayed, validateRoomOpen } from '../../../src/validations';
 
 describe('App lifecycle', () => {
   it('should keep the open conversation after going to background and back', async () => {
-    const user = await testData.user();
-    const channel = await testData.publicChannel([user]);
+    const { user, channel } = await scenario.userInChannel();
     const text = buildMessage();
 
-    await roomFlow.loginAndOpenRoom(user.credentials, channel.name);
-    await roomScreen.sendMessage(text);
-    await expect(roomScreen.message(text)).toBeDisplayed({ wait: TIMEOUTS.medium });
+    await loginAndOpenRoom(user, channel);
+    await sendMessage(text);
+    await validateMessageDisplayed(text);
+    await sendAppToBackground();
 
-    await device.sendToBackground(5);
-
-    await roomScreen.waitForDisplayed();
-    await expect(roomScreen.title(channel.name)).toBeDisplayed();
-    await expect(roomScreen.message(text)).toBeDisplayed();
+    await validateRoomOpen(channel);
+    await validateMessageDisplayed(text);
   });
 });

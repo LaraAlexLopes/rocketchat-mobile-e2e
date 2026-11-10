@@ -1,31 +1,21 @@
-import { TIMEOUTS } from '../../../src/config/timeouts';
-import { buildMessage } from '../../../src/data/factories/message.factory';
-import { testData } from '../../../src/data/test-data';
-import { roomFlow } from '../../../src/flows/room.flow';
-import { roomScreen } from '../../../src/screens/room.screen';
-import { device } from '../../../src/utils/device';
-import { expectNeverDisplayed } from '../../../src/utils/expectations';
+import { scenario } from '../../../src/data/scenarios';
+import { goOffline, goOnline, loginAndOpenRoom } from '../../../src/steps';
+import { validateMessageDisplayed, validateMessageNeverArrives } from '../../../src/validations';
 
 describe('Offline receiving', () => {
-  afterEach(async () => {
-    await device.setAirplaneMode(false);
-  });
+  afterEach(goOnline);
 
   it('should show messages received while offline once the connection is back', async () => {
-    const reader = await testData.user();
-    const sender = await testData.user();
-    const channel = await testData.publicChannel([reader, sender]);
-    const texts = [buildMessage(), buildMessage()];
+    const { user: reader, other: sender, channel } = await scenario.twoUsersInChannel();
 
-    await roomFlow.loginAndOpenRoom(reader.credentials, channel.name);
-    await device.setAirplaneMode(true);
-    for (const text of texts) await (await sender.api()).messages.send(channel._id, text);
+    await loginAndOpenRoom(reader, channel);
+    await goOffline();
+    const first = await scenario.messageFrom(sender, channel);
+    const second = await scenario.messageFrom(sender, channel);
+    await validateMessageNeverArrives(first.msg);
+    await goOnline();
 
-    await expectNeverDisplayed(roomScreen.selectors.message(texts[0]));
-    await device.setAirplaneMode(false);
-
-    for (const text of texts) {
-      await expect(roomScreen.message(text)).toBeDisplayed({ wait: TIMEOUTS.long * 2 });
-    }
+    await validateMessageDisplayed(first.msg);
+    await validateMessageDisplayed(second.msg);
   });
 });
