@@ -13,7 +13,6 @@ const endpointPrefix = (type: RoomType) => (type === 'public' ? 'channels' : 'gr
 export class RoomsService {
   constructor(private readonly client: ApiClient) {}
 
-  /** Creates a room owned by the client's user, with the given usernames as members. */
   async create(name: string, type: RoomType, members: string[] = []): Promise<Room> {
     const response = await this.client.post<{ channel?: Room; group?: Room }>(`${endpointPrefix(type)}.create`, {
       name,
@@ -28,7 +27,6 @@ export class RoomsService {
     await this.client.post(`${room.t === 'c' ? 'channels' : 'groups'}.delete`, { roomId: room._id });
   }
 
-  /** Admin-only: public and private rooms whose name contains the filter. */
   async listByPrefix(prefix: string): Promise<Room[]> {
     const { rooms } = await this.client.get<{ rooms: Room[] }>('rooms.adminRooms', {
       filter: prefix,

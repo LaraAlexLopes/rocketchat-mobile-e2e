@@ -5,14 +5,9 @@ import { buildUser } from './factories/user.factory';
 
 export interface TestUser extends User {
   credentials: Credentials;
-  /** API session of this user, to act on their behalf (send messages, etc.). */
   api: () => Promise<Api>;
 }
 
-/**
- * Seeds data through the REST API, never through the UI.
- * Everything created here is tracked and deleted after each test.
- */
 export const testData = {
   async user(overrides: Partial<NewUser> = {}): Promise<TestUser> {
     const admin = await asAdmin();

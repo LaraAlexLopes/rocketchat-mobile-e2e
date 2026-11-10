@@ -8,7 +8,6 @@ import { logger } from './src/utils/logger';
 export const config: WebdriverIO.Config = {
   runner: 'local',
   specs: ['./test/specs/**/*.spec.ts'],
-  // A single emulator runs one session at a time.
   maxInstances: 1,
 
   capabilities: [
@@ -36,7 +35,6 @@ export const config: WebdriverIO.Config = {
     [
       'appium',
       {
-        // adb_shell is needed to toggle airplane mode in the offline specs.
         args: { allowInsecure: '*:adb_shell' },
         logPath: './logs',
       },
@@ -66,12 +64,10 @@ export const config: WebdriverIO.Config = {
     ],
   ],
 
-  /** Launcher: fixes the run id before workers start, so all of them share the same data prefix. */
   onPrepare() {
     logger.info(`test run ${runId()} (data prefix "${runPrefix()}")`);
   },
 
-  /** Worker: evidence on failure, then delete everything the test created. */
   async afterTest(test, _context, { passed }) {
     if (!passed) {
       await driver.takeScreenshot();
@@ -84,7 +80,6 @@ export const config: WebdriverIO.Config = {
     }
   },
 
-  /** Launcher: safety net for anything the per-test cleanup missed in this run. */
   async onComplete() {
     try {
       await sweep(runPrefix());

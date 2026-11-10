@@ -1,9 +1,5 @@
 import { TIMEOUTS } from '../config/timeouts';
 
-/**
- * Polls an async check until it returns a value (not undefined/false) or times out.
- * Used for backend assertions, since the server persists asynchronously from what the UI shows.
- */
 export const eventually = async <T>(
   check: () => Promise<T | undefined | false>,
   { timeout = TIMEOUTS.medium, interval = 500, message = 'condition was not met' } = {},

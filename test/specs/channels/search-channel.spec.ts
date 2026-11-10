@@ -12,7 +12,7 @@ describe('Channel search', () => {
     const privateGroup = await testData.privateGroup([outsider]);
 
     await authFlow.loginAs(user.credentials);
-    // Both rooms share the run prefix, so a single search covers the positive and the negative case.
+
     await roomsListScreen.search(runPrefix());
 
     await expect(roomsListScreen.item(publicChannel.name)).toBeDisplayed({ wait: TIMEOUTS.long });

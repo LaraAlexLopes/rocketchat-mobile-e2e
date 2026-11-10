@@ -2,10 +2,6 @@ import { env } from '../config/env';
 import { TIMEOUTS } from '../config/timeouts';
 import { byButtonText, byTestId } from './selectors';
 
-/**
- * System dialogs that may cover the app on emulators: runtime permissions, autofill,
- * and "<app> isn't responding" (ANR), common on slow CI emulators. For an ANR we tap "Wait".
- */
 const SYSTEM_DIALOG_BUTTONS = [
   byTestId('com.android.permissioncontroller:id/permission_allow_button'),
   byTestId('android:id/autofill_save_no'),
@@ -13,16 +9,11 @@ const SYSTEM_DIALOG_BUTTONS = [
   byButtonText('Wait'),
 ];
 
-/** Runtime permissions the app asks for on first launch. Granting them up front avoids the dialogs. */
 const RUNTIME_PERMISSIONS = ['android.permission.POST_NOTIFICATIONS'];
 
 const shell = (command: string, args: string[]) => driver.execute('mobile: shell', { command, args });
 
 export const device = {
-  /**
-   * Starts the app from a clean state: no stored servers, sessions or cached messages.
-   * Clearing app data also revokes runtime permissions, so they are granted again before launch.
-   */
   async resetApp(): Promise<void> {
     await driver.execute('mobile: terminateApp', { appId: env.appPackage });
     await driver.execute('mobile: clearApp', { appId: env.appPackage });
@@ -32,7 +23,6 @@ export const device = {
     await driver.execute('mobile: activateApp', { appId: env.appPackage });
   },
 
-  /** Taps away any system dialog currently on screen. Returns true if one was dismissed. */
   async dismissSystemDialogs(): Promise<boolean> {
     let dismissed = false;
     for (const selector of SYSTEM_DIALOG_BUTTONS) {
@@ -45,11 +35,6 @@ export const device = {
     return dismissed;
   },
 
-  /**
-   * Waits for an app element while removing what may cover it at any moment:
-   * system dialogs (asynchronous, so one check after launch is not enough) and the soft keyboard,
-   * which can hide buttons at the bottom of a form such as login submit.
-   */
   async waitForAppElement(selector: string, description: string, timeout: number = TIMEOUTS.long): Promise<void> {
     await driver.waitUntil(
       async () => {
@@ -62,7 +47,6 @@ export const device = {
     );
   },
 
-  /** Finger swipe between two points, in screen coordinates. */
   async swipe(from: { x: number; y: number }, to: { x: number; y: number }, durationMs = 600): Promise<void> {
     await driver
       .action('pointer', { parameters: { pointerType: 'touch' } })
@@ -74,10 +58,9 @@ export const device = {
       .perform();
   },
 
-  /** Requires Appium's `adb_shell` insecure feature (enabled in wdio.conf.ts). */
   async setAirplaneMode(enabled: boolean): Promise<void> {
     await shell('cmd', ['connectivity', 'airplane-mode', enabled ? 'enable' : 'disable']);
-    await driver.pause(TIMEOUTS.short / 2); // give the OS time to drop or restore the connection
+    await driver.pause(TIMEOUTS.short / 2);
   },
 
   async hideKeyboard(): Promise<void> {

@@ -28,7 +28,6 @@ class RoomScreen extends BaseScreen {
     return $(this.selectors.message(text));
   }
 
-  /** Marker shown next to a message that could not be delivered to the server. */
   messageError(text: string) {
     return $(this.selectors.messageError(text));
   }
@@ -49,10 +48,6 @@ class RoomScreen extends BaseScreen {
     await this.tap(this.selectors.confirmDeleteButton);
   }
 
-  /**
-   * Actions at the bottom of the sheet start below the fold.
-   * Drags the sheet handle up to expand it, then scrolls the sheet content, until the action shows up.
-   */
   private async revealInActionSheet(selector: string, attempts = 4): Promise<void> {
     const { width, height } = await driver.getWindowSize();
     const x = width / 2;
@@ -61,7 +56,6 @@ class RoomScreen extends BaseScreen {
     for (let attempt = 0; attempt < attempts; attempt++) {
       if (await $(selector).isDisplayed()) return;
 
-      // First drag the handle (expands the sheet); afterwards scroll the sheet content.
       const fromY = attempt === 0 && (await handle.isDisplayed()) ? (await handle.getLocation()).y + 10 : height * 0.8;
       await device.swipe({ x, y: fromY }, { x, y: height * 0.15 });
       await driver.pause(500);

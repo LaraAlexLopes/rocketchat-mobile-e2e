@@ -18,7 +18,6 @@ describe('Send message', () => {
     await expect(roomScreen.message(text)).toBeDisplayed({ wait: TIMEOUTS.medium });
     await expect(roomScreen.messageError(text)).not.toBeDisplayed();
 
-    // The screen alone does not prove delivery: check what the server actually stored.
     const admin = await asAdmin();
     const stored = await eventually(() => admin.messages.findByText(channel, text), {
       message: `message "${text}" was not stored on the server`,

@@ -7,7 +7,6 @@ import { workspaceScreen } from '../screens/workspace.screen';
 import { device } from '../utils/device';
 
 export const authFlow = {
-  /** Fresh app → connect to the test server → login form. */
   async openLoginForm(): Promise<void> {
     await device.resetApp();
     await onboardingScreen.waitForDisplayed();
@@ -17,7 +16,6 @@ export const authFlow = {
     await loginScreen.waitForDisplayed();
   },
 
-  /** Full login through the UI, ending on the rooms list. */
   async loginAs(credentials: Credentials): Promise<void> {
     await authFlow.openLoginForm();
     await loginScreen.submit(credentials);

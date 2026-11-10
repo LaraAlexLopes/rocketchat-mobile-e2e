@@ -4,9 +4,7 @@ import path from 'node:path';
 const read = (name: string, fallback: string): string => process.env[name]?.trim() || fallback;
 
 export const env = {
-  /** Server URL used by the test runner for API seeding and cleanup. */
   apiUrl: read('API_URL', 'http://localhost:3000'),
-  /** Server URL typed into the app. 10.0.2.2 is the host machine from inside the Android emulator. */
   appServerUrl: read('APP_SERVER_URL', 'http://10.0.2.2:3000'),
   admin: {
     username: read('ADMIN_USERNAME', 'admin.e2e'),

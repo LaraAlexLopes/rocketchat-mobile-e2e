@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Waits until the Rocket.Chat API answers, so tests never start against a booting server.
 set -euo pipefail
 
 URL="${API_URL:-http://localhost:3000}/api/info"

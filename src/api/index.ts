@@ -9,7 +9,6 @@ export type { Message } from './services/messages.service';
 export type { Room, RoomType } from './services/rooms.service';
 export type { NewUser, User } from './services/users.service';
 
-/** Services bound to one authenticated session. */
 export const servicesFor = (client: ApiClient) => ({
   client,
   users: new UsersService(client),
@@ -21,7 +20,6 @@ export type Api = ReturnType<typeof servicesFor>;
 
 let adminApi: Promise<Api> | undefined;
 
-/** Admin session, created once per worker and reused. */
 export const asAdmin = (): Promise<Api> => {
   adminApi ??= ApiClient.login(env.admin).then(servicesFor);
   return adminApi;

@@ -5,7 +5,6 @@ import { logger } from './logger';
 
 const ATTRIBUTE = (name: string) => new RegExp(`${name}="([^"]*)"`);
 
-/** One line per node that has something useful to select by: id, accessibility label or text. */
 const summarise = (pageSource: string): string[] =>
   pageSource
     .split(/<(?=[a-zA-Z])/)
@@ -18,10 +17,6 @@ const summarise = (pageSource: string): string[] =>
     })
     .filter(Boolean);
 
-/**
- * Saves the full UI hierarchy to logs/ and prints a compact summary,
- * so a failure in CI shows what was actually on screen.
- */
 export const dumpScreen = async (testTitle: string): Promise<void> => {
   try {
     const source = await driver.getPageSource();

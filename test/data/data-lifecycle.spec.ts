@@ -1,7 +1,3 @@
-/**
- * Verifies the test data layer itself (seeding, tracking, cleanup, sweeping) against the real server.
- * Runs without a device: `npm run test:data`.
- */
 import assert from 'node:assert/strict';
 
 import { ApiError, asAdmin, asUser } from '../../src/api';

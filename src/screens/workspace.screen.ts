@@ -1,7 +1,6 @@
 import { byButtonText } from '../utils/selectors';
 import { BaseScreen } from './base.screen';
 
-/** Workspace landing screen, shown after connecting to a server. */
 class WorkspaceScreen extends BaseScreen {
   private readonly selectors = {
     loginButton: byButtonText('Login'),

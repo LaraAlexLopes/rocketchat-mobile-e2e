@@ -12,7 +12,6 @@ export const roomFlow = {
     await roomScreen.title(roomName).waitForDisplayed({ timeout: TIMEOUTS.medium });
   },
 
-  /** Most message tests start here: logged in and inside a room. */
   async loginAndOpenRoom(credentials: Credentials, roomName: string): Promise<void> {
     await authFlow.loginAs(credentials);
     await roomFlow.openRoom(roomName);

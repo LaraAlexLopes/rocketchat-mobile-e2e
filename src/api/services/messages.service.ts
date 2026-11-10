@@ -16,7 +16,6 @@ export class MessagesService {
     return message;
   }
 
-  /** Latest messages of a room, newest first. */
   async list(room: Pick<Room, '_id' | 't'>): Promise<Message[]> {
     const endpoint = room.t === 'c' ? 'channels.messages' : 'groups.messages';
     const { messages } = await this.client.get<{ messages: Message[] }>(endpoint, { roomId: room._id, count: 100 });
