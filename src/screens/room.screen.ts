@@ -1,4 +1,5 @@
 import { TIMEOUTS } from '../config/timeouts';
+import { device } from '../utils/device';
 import { byButtonText, byTestId } from '../utils/selectors';
 import { BaseScreen } from './base.screen';
 
@@ -43,13 +44,29 @@ class RoomScreen extends BaseScreen {
     await message.longPress();
     await $(this.selectors.actionSheet).waitForDisplayed({ timeout: TIMEOUTS.medium });
 
-    // The delete action sits at the bottom of the sheet; expand it when it is not visible yet.
-    const deleteAction = $(this.selectors.deleteAction);
-    if (!(await deleteAction.isDisplayed())) {
-      await $(this.selectors.actionSheetHandle).dragAndDrop({ x: 0, y: -600 });
-    }
+    await this.revealInActionSheet(this.selectors.deleteAction);
     await this.tap(this.selectors.deleteAction);
     await this.tap(this.selectors.confirmDeleteButton);
+  }
+
+  /**
+   * Actions at the bottom of the sheet start below the fold.
+   * Drags the sheet handle up to expand it, then scrolls the sheet content, until the action shows up.
+   */
+  private async revealInActionSheet(selector: string, attempts = 4): Promise<void> {
+    const { width, height } = await driver.getWindowSize();
+    const x = width / 2;
+    const handle = $(this.selectors.actionSheetHandle);
+
+    for (let attempt = 0; attempt < attempts; attempt++) {
+      if (await $(selector).isDisplayed()) return;
+
+      // First drag the handle (expands the sheet); afterwards scroll the sheet content.
+      const fromY = attempt === 0 && (await handle.isDisplayed()) ? (await handle.getLocation()).y + 10 : height * 0.8;
+      await device.swipe({ x, y: fromY }, { x, y: height * 0.15 });
+      await driver.pause(500);
+    }
+    await $(selector).waitForDisplayed({ timeout: TIMEOUTS.short });
   }
 }
 

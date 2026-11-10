@@ -56,6 +56,18 @@ export const device = {
     );
   },
 
+  /** Finger swipe between two points, in screen coordinates. */
+  async swipe(from: { x: number; y: number }, to: { x: number; y: number }, durationMs = 600): Promise<void> {
+    await driver
+      .action('pointer', { parameters: { pointerType: 'touch' } })
+      .move({ x: Math.round(from.x), y: Math.round(from.y) })
+      .down()
+      .pause(100)
+      .move({ duration: durationMs, x: Math.round(to.x), y: Math.round(to.y) })
+      .up()
+      .perform();
+  },
+
   /** Requires Appium's `adb_shell` insecure feature (enabled in wdio.conf.ts). */
   async setAirplaneMode(enabled: boolean): Promise<void> {
     await shell('cmd', ['connectivity', 'airplane-mode', enabled ? 'enable' : 'disable']);
