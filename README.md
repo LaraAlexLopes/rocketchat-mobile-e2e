@@ -29,7 +29,7 @@ WebdriverIO 10 · Appium 3 (UiAutomator2) · Mocha · TypeScript · Faker · All
 | Messages        | Send plain and accented text `@smoke` (2 cases)                 | Stored with the right author and text |
 | Messages        | Message from another user appears in real time                  | Seeded through the API                |
 | Messages        | Edit a message                                                  | New text and `editedAt` stored        |
-| Messages        | Quote another user message                                      | Quote attachment stored               |
+| Messages        | Quote another user message                                      | Reply links to the quoted message     |
 | Messages        | React with an emoji                                             | Reaction stored for the user          |
 | Messages        | Reply in a thread                                               | Reply linked to the parent (`tmid`)   |
 | Messages        | Mention a member from autocomplete                              | Mention stored on the message         |
