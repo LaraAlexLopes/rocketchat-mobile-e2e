@@ -35,6 +35,19 @@ export const device = {
     return dismissed;
   },
 
+  async waitForAnyAppElement(selectors: string[], description: string, timeout: number = TIMEOUTS.long): Promise<void> {
+    await driver.waitUntil(
+      async () => {
+        for (const selector of selectors) {
+          if (await $(selector).isDisplayed()) return true;
+        }
+        await device.dismissSystemDialogs();
+        return false;
+      },
+      { timeout, interval: 1_000, timeoutMsg: `none of ${description} was displayed` },
+    );
+  },
+
   async waitForAppElement(selector: string, description: string, timeout: number = TIMEOUTS.long): Promise<void> {
     await driver.waitUntil(
       async () => {
