@@ -30,11 +30,18 @@ export const loginAs = async (actor: Actor): Promise<void> => {
   await roomsListScreen.waitForDisplayed();
 };
 
+export const waitForLoggedOutScreen = (): Promise<void> =>
+  device.waitForAnyAppElement(
+    [onboardingScreen.rootSelector, workspaceScreen.rootSelector, loginScreen.rootSelector],
+    'the onboarding, workspace or login screens',
+  );
+
 export const logout = async (): Promise<void> => {
   await roomsListScreen.openSidebar();
   await sidebarScreen.openSettings();
   await settingsScreen.waitForDisplayed();
   await settingsScreen.logout();
+  await waitForLoggedOutScreen();
 };
 
 export const restartApp = (): Promise<void> => device.restartApp();
