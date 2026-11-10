@@ -14,7 +14,6 @@ export default tseslint.config(
   {
     files: ['test/specs/**/*.ts'],
     rules: {
-      // Mocha `this` / arrow function freedom in specs
       '@typescript-eslint/no-unused-expressions': 'off',
     },
   },

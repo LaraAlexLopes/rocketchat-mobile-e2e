@@ -26,11 +26,14 @@ export class UsersService {
     return created;
   }
 
+  async setActive(userId: string, active: boolean): Promise<void> {
+    await this.admin.post('users.setActiveStatus', { userId, activeStatus: active });
+  }
+
   async delete(userId: string): Promise<void> {
     await this.admin.post('users.delete', { userId, confirmRelinquish: true });
   }
 
-  /** Lists every user whose username starts with the prefix. users.list ignores `query`, so it filters client-side. */
   async listByPrefix(prefix: string): Promise<User[]> {
     const pageSize = 100;
     const matches: User[] = [];

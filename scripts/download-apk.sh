@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Downloads a pinned Rocket.Chat Android release, so every run tests the same app version.
 set -euo pipefail
 
 VERSION="${ROCKETCHAT_APP_VERSION:-4.78.1}"

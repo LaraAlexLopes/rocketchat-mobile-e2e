@@ -1,10 +1,6 @@
 import { asAdmin } from '../api';
 import { logger } from '../utils/logger';
 
-/**
- * Safety net for data the per-test cleanup could not remove (crashed worker, killed run, failed hook).
- * Deletes every room and user whose name starts with the prefix.
- */
 export const sweep = async (prefix: string): Promise<{ rooms: number; users: number }> => {
   const admin = await asAdmin();
 

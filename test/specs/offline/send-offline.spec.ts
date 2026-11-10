@@ -8,7 +8,6 @@ import { device } from '../../../src/utils/device';
 
 describe('Offline messaging', () => {
   afterEach(async () => {
-    // Always bring the network back, even when the test fails, so the next spec starts online.
     await device.setAirplaneMode(false);
   });
 
@@ -24,7 +23,6 @@ describe('Offline messaging', () => {
     await expect(roomScreen.message(text)).toBeDisplayed({ wait: TIMEOUTS.medium });
     await expect(roomScreen.messageError(text)).toBeDisplayed({ wait: TIMEOUTS.long });
 
-    // The message only exists on the device: the server must not have it.
     const stored = await (await asAdmin()).messages.findByText(channel, text);
     expect(stored).toBeUndefined();
   });

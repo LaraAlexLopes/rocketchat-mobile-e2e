@@ -3,6 +3,7 @@ import { testData } from '../../../src/data/test-data';
 import { authFlow } from '../../../src/flows/auth.flow';
 import { loginScreen } from '../../../src/screens/login.screen';
 import { roomsListScreen } from '../../../src/screens/rooms-list.screen';
+import { expectNeverDisplayed } from '../../../src/utils/expectations';
 
 describe('Login', () => {
   it('should log in with valid credentials @smoke', async () => {
@@ -22,5 +23,18 @@ describe('Login', () => {
 
     await expect(loginScreen.credentialsRejectedMessage).toBeDisplayed({ wait: TIMEOUTS.medium });
     await expect(roomsListScreen.root).not.toBeDisplayed();
+  });
+
+  it('should not let a deactivated user log in', async () => {
+    const user = await testData.deactivatedUser();
+
+    await authFlow.openLoginForm();
+    await loginScreen.submit(user.credentials);
+
+    await expect(loginScreen.accountNotActivatedMessage).toBeDisplayed({ wait: TIMEOUTS.medium });
+    await loginScreen.dismissAlert();
+
+    await expectNeverDisplayed(roomsListScreen.rootSelector);
+    await expect(loginScreen.root).toBeDisplayed();
   });
 });

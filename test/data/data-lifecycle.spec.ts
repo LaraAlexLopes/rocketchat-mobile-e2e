@@ -1,7 +1,3 @@
-/**
- * Verifies the test data layer itself (seeding, tracking, cleanup, sweeping) against the real server.
- * Runs without a device: `npm run test:data`.
- */
 import assert from 'node:assert/strict';
 
 import { ApiError, asAdmin, asUser } from '../../src/api';
@@ -74,5 +70,54 @@ describe('Test data lifecycle', () => {
 
     assert.equal(stored?._id, sent._id);
     assert.equal(stored?.u.username, author.username);
+  });
+
+  it('should block login for a deactivated user', async () => {
+    const user = await testData.deactivatedUser();
+
+    await assert.rejects(asUser(user.credentials), (error: unknown) => {
+      assert.ok(error instanceof ApiError);
+      assert.equal(error.status, 401);
+      return true;
+    });
+  });
+
+  it('should reject messages from regular members in a read-only channel', async () => {
+    const member = await testData.user();
+    const channel = await testData.readOnlyChannel([member]);
+
+    await assert.rejects((await member.api()).messages.send(channel._id, 'not allowed'), ApiError);
+    assert.ok(channel.ro);
+  });
+
+  it('should list the members of a seeded room', async () => {
+    const member = await testData.user();
+    const channel = await testData.publicChannel([member]);
+
+    assert.ok((await (await asAdmin()).rooms.members(channel)).includes(member.username));
+  });
+
+  it('should exchange direct messages between seeded users', async () => {
+    const sender = await testData.user();
+    const recipient = await testData.user();
+    const dm = await testData.directMessage(sender, recipient);
+
+    await (await sender.api()).messages.send(dm._id, 'hello in private');
+    const history = await (await recipient.api()).messages.list(dm);
+
+    assert.equal(dm.t, 'd');
+    assert.ok(history.some(message => message.msg === 'hello in private'));
+  });
+
+  it('should find and track a room created outside the data layer', async () => {
+    const owner = await testData.user();
+    const name = buildRoomName();
+    await (await owner.api()).rooms.create(name, 'private');
+
+    const room = await testData.trackRoomCreatedInApp(name);
+    await dataTracker.cleanup();
+
+    assert.equal(room.u?.username, owner.username);
+    assert.equal(await (await asAdmin()).rooms.findByName(name), undefined);
   });
 });

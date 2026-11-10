@@ -1,7 +1,6 @@
 import { byButtonText, byTestId } from '../utils/selectors';
 import { BaseScreen } from './base.screen';
 
-/** "Add workspace" screen shown on a fresh install. */
 class OnboardingScreen extends BaseScreen {
   private readonly selectors = {
     serverInput: byTestId('new-server-view-input'),

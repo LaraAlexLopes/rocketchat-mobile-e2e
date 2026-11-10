@@ -3,13 +3,8 @@ import { logger } from '../utils/logger';
 
 type TrackedRecord = { kind: 'user'; user: User } | { kind: 'room'; room: Room };
 
-/** Errors that mean the record is already gone, so cleanup stays idempotent. */
 const ALREADY_DELETED = new Set(['error-invalid-user', 'error-room-not-found', 'error-invalid-room']);
 
-/**
- * Keeps every record a test creates and deletes them afterwards, newest first.
- * Rooms are deleted before the users that own them.
- */
 class DataTracker {
   private records: TrackedRecord[] = [];
 
@@ -52,5 +47,4 @@ class DataTracker {
 
 const describe = (record: TrackedRecord) => (record.kind === 'user' ? record.user.username : record.room.name);
 
-/** One tracker per worker process: WebdriverIO runs each spec file in its own worker. */
 export const dataTracker = new DataTracker();

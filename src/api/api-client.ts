@@ -24,10 +24,6 @@ export class ApiError extends Error {
 
 type Query = Record<string, string | number | string[]>;
 
-/**
- * Minimal Rocket.Chat REST client.
- * Each instance is bound to one user session, so tests can act as the admin or as any seeded user.
- */
 export class ApiClient {
   private constructor(private readonly session: Session) {}
 
